@@ -68,7 +68,7 @@ class LineDetector:
                 e = math.pow(theta - preTheta, 2)
                 if (e < error):
                     error = e
-                    buf = (theta, (hullL[i][0][0], hullL[i][0][1]), (hullL[i + 1][0][0], hullL[i + 1][0][1]))
+                    buf = theta, (hullL[i][0][0], hullL[i][0][1]), (hullL[i + 1][0][0], hullL[i + 1][0][1])
             if error < math.pi * 50 / 180: 
                 self.lineSegmentL = buf
             error = 10000
@@ -80,7 +80,7 @@ class LineDetector:
                 e = math.pow(theta - preTheta, 2)
                 if (e < error):
                     error = e
-                    buf = (theta, (hullR[i][0][0], hullR[i][0][1]), (hullR[i + 1][0][0], hullR[i + 1][0][1]))
+                    buf = theta, (hullR[i][0][0], hullR[i][0][1]), (hullR[i + 1][0][0], hullR[i + 1][0][1])
             if error < math.pi * 50 / 180: 
                 self.lineSegmentR = buf
         
@@ -110,7 +110,7 @@ class LineDetector:
         
         centerX = int((lt[0] + lb[0] + rt[0] + rb[0]) / 4)
         centerY = int((lt[1] + lb[1] + rt[1] + rb[1]) / 4)
-        center = (centerX, centerY)
+        center = centerX, centerY
         cv2.circle(frame, center, 6, red, 12)
         cv2.line(frame, (int(frame.shape[1] / 2), 0), (int(frame.shape[1] / 2), frame.shape[0]), red)
         cv2.line(frame, center, (int(frame.shape[1] / 2), centerY), red)
@@ -169,10 +169,10 @@ class AreaDetector:
         valL1, valL2, angleL = pdtL[2], pdtL[3], pdtL[4]
         valR1, valR2, angleR = pdtR[2], pdtR[3], pdtR[4]
 
-        endL1 = (int(centerL[0] + math.cos((angleL - 180) * math.pi / 180) * valL1), int(centerL[1] + math.sin((angleL - 180) * math.pi / 180) * valL1))
-        endL2 = (int(centerL[0] + math.cos((angleL - 90) * math.pi / 180) * valL2), int(centerL[1] + math.sin((angleL - 90) * math.pi / 180) * valL2))
-        endR1 = (int(centerR[0] + math.cos((angleR + 180) * math.pi / 180) * valR1), int(centerR[1] + math.sin((angleR + 180) * math.pi / 180) * valR1))
-        endR2 = (int(centerR[0] + math.cos((angleR + 90) * math.pi / 180) * valR2), int(centerR[1] + math.sin((angleR + 90) * math.pi / 180) * valR2))
+        endL1 = int(centerL[0] + math.cos((angleL - 180) * math.pi / 180) * valL1), int(centerL[1] + math.sin((angleL - 180) * math.pi / 180) * valL1)
+        endL2 = int(centerL[0] + math.cos((angleL - 90) * math.pi / 180) * valL2), int(centerL[1] + math.sin((angleL - 90) * math.pi / 180) * valL2)
+        endR1 = int(centerR[0] + math.cos((angleR + 180) * math.pi / 180) * valR1), int(centerR[1] + math.sin((angleR + 180) * math.pi / 180) * valR1)
+        endR2 = int(centerR[0] + math.cos((angleR + 90) * math.pi / 180) * valR2), int(centerR[1] + math.sin((angleR + 90) * math.pi / 180) * valR2)
         cv2.arrowedLine(frame, centerL, endL1, red, 2)
         cv2.arrowedLine(frame, centerL, endL2, red, 2)
         cv2.arrowedLine(frame, centerR, endR1, red, 2)

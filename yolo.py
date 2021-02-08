@@ -64,7 +64,7 @@ class Yolo:
                 confidence = detection[4]
                 if confidence > self.conf_thresh:
                     box = detection[:4] * np.array([w, h, w, h])
-                    (centerX, centerY, width, height) = box.astype("int")
+                    centerX, centerY, width, height = box.astype("int")
                     center = [centerX, centerY]
                     centers.append(center)
                     x = int(centerX - (width / 2))
@@ -78,8 +78,8 @@ class Yolo:
         indices = cv2.dnn.NMSBoxes(boxes, confidences, self.conf_thresh, self.nms_thresh)
         if len(indices) > 0:
             for i in indices.flatten():
-                (x, y) = (boxes[i][0], boxes[i][1])
-                (w, h) = (boxes[i][2], boxes[i][3])
+                x, y = boxes[i][0], boxes[i][1]
+                w, h = boxes[i][2], boxes[i][3]
                 YoloResults.add(self.classes[classIDs[i]], confidences[i], centers[i], boxes[i])
                 if self.drawmode == Drawmode.rectangle:
                     color = [int(c) for c in self.colors[classIDs[i]]]
