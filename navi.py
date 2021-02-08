@@ -1,7 +1,8 @@
+import os
 import numpy as np
 import cv2
 import math
-import media, kalman, yolo
+import media, kalman, yolo, tcpSocket
 from copy import copy
 
 red = (0, 0, 180)
@@ -84,13 +85,13 @@ class LineDetector:
             if error < math.pi * 50 / 180: 
                 self.lineSegmentR = buf
         
-        cv2.circle(frame, self.lineSegmentL[1], 3, blue, 4)
-        cv2.circle(frame, self.lineSegmentL[2], 3, blue, 4)
-        cv2.circle(frame, self.lineSegmentR[1], 3, blue, 4)
-        cv2.circle(frame, self.lineSegmentR[2], 3, blue, 4)
+        # cv2.circle(frame, self.lineSegmentL[1], 3, blue, 4)
+        # cv2.circle(frame, self.lineSegmentL[2], 3, blue, 4)
+        # cv2.circle(frame, self.lineSegmentR[1], 3, blue, 4)
+        # cv2.circle(frame, self.lineSegmentR[2], 3, blue, 4)
         
         if self.isMulch == True: topY = frame.shape[0] / 3
-        else: topY = frame.shape[0] / 4
+        else: topY = frame.shape[0] * 2 / 3
         bottomY = frame.shape[0]
         interceptL = self.lineSegmentL[1][1] - math.tan(self.lineSegmentL[0]) * self.lineSegmentL[1][0]
         interceptR = self.lineSegmentR[1][1] - math.tan(self.lineSegmentR[0]) * self.lineSegmentR[1][0]
@@ -204,24 +205,61 @@ class AreaDetector:
 
 if __name__ == '__main__':
 
-    cap = media.Capture("C:\\Users\\yamataku1998\\Desktop\\mulch\\mulch.mp4", (1024, 576))
-    cfg = "C:\\Users\\yamataku1998\\Desktop\\mulch_tiny\\mulch_tiny.cfg"
-    names = "C:\\Users\\yamataku1998\\Desktop\\mulch_tiny\mulch.names"
-    weights = "C:\\Users\\yamataku1998\\Desktop\\mulch_tiny\\mulch_tiny.weights"
-    detector = yolo.Yolo(cfg, names, weights, (640, 480), yolo.Drawmode.off, 0.25, 0.1)
-    #navi = LineDetector(7)
-    navi = AreaDetector(7)
+    #cap = media.Capture(0, (1024, 576))
+    cap = media.Capture("C:\\Users\\yamataku1998\\Desktop\\tsuru\\Tsuru_test.mp4", (1024, 576))
+    cfg = 'tsuru_tiny\\tsuru.cfg'
+    names = 'tsuru_tiny\\tsuru.names'
+    weights = 'tsuru_tiny\\tsuru.weights'
+    # cap = media.Capture("C:\\Users\\yamataku1998\\Desktop\\mulch\\mulch.mp4", (1024, 576))
+    # cfg = 'mulch_tiny\\mulch_tiny.cfg'
+    # names = 'mulch_tiny\mulch.names'
+    # weights = 'mulch_tiny\\mulch_tiny.weights'
+    detector = yolo.Yolo(cfg, names, weights, (640, 480), yolo.Drawmode.point, 0.25, 0.1)
+    navi = LineDetector(7, False)
+    #navi = AreaDetector(7, False)
 
-    while cap.isOpened == True:
-        frame = cap.read()
-        results = detector.run(frame)
-        points = []
-        for i in range(results.count):
-            if results.labels[i] == "mulch border":
-                points.append(results.centers[i])
-        error = navi.process(frame, points)
-        cv2.imshow(" ", frame)
-        cv2.waitKey(1)
-    
+    sock = tcpSocket.TcpServer()
+    while cap.isOpened:
+        rcv = sock.receive()
+        if rcv == 'request\n':
+            frame = cap.read()
+            results = detector.run(frame)
+            error = navi.process(frame, results.centers)
+            sock.send(error)
+            cv2.imshow(" ", frame)
+            cv2.waitKey(1)
+            print("Success")
+        elif rcv == 'finish\n':
+            print("Acccept Finish")
+            break
+        else:
+            print("Message must be 'request' or 'finish'.")
+            break
+    sock.close()
     cap.close()
-    cv2.destroyAllWindows()
+
+
+# if __name__ == '__main__':
+
+#     #cap = media.Capture(0, (1024, 576))
+#     cap = media.Capture("C:\\Users\\yamataku1998\\Desktop\\mulch\\mulch.mp4", (1024, 576))
+#     cfg = 'mulch_tiny\\mulch_tiny.cfg'
+#     names = 'mulch_tiny\mulch.names'
+#     weights = 'mulch_tiny\\mulch_tiny.weights'
+#     detector = yolo.Yolo(cfg, names, weights, (640, 480), yolo.Drawmode.off, 0.25, 0.1)
+#     #navi = LineDetector(7)
+#     navi = AreaDetector(7)
+
+#     while cap.isOpened:
+#         frame = cap.read()
+#         results = detector.run(frame)
+#         points = []
+#         for i in range(results.count):
+#             if results.labels[i] == "border":
+#                 points.append(results.centers[i])
+#         error = navi.process(frame, points)
+#         cv2.imshow(" ", frame)
+#         cv2.waitKey(1)
+    
+#     cap.close()
+#     cv2.destroyAllWindows()
