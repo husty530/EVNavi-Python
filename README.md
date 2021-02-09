@@ -8,7 +8,6 @@
 * OpenCV Contribution ... YOLOの使用に必要です  
 　→ すでに普通版がある場合は削除（pip uninstall opencv-python）  
 　→ pip install opencv-contrib-python  
-* 詳細は各.pyファイルを見てください  
  
 ## Usage
 * デフォルトのIPは"127.0.0.1", ポートは"3000"
