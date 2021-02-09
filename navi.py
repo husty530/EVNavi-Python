@@ -30,9 +30,9 @@ class LineDetector:
         pointsL = []
         pointsR = []
         for p in points:
-            if p[0] < frame.shape[1] / 2 and p[1] > frame.shape[0] / 4 and frame.shape[0] * 9 / 10:
+            if p[0] < frame.shape[1] / 2 and p[1] > frame.shape[0] / 4 and p[1] < frame.shape[0] * 9 / 10:
                 pointsL.append(p)
-            elif p[0] > frame.shape[1] / 2 and p[1] > frame.shape[0] / 4 and frame.shape[0] * 9 / 10:
+            elif p[0] > frame.shape[1] / 2 and p[1] > frame.shape[0] / 4 and p[1] < frame.shape[0] * 9 / 10:
                 pointsR.append(p)
         if (len(pointsL) == 0 or len(pointsR) == 0): return 0
         pointsL.sort(key=lambda x: x[1])
