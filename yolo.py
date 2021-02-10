@@ -4,25 +4,26 @@ import numpy as np
 
 class YoloResults:
     
-    labels = []
-    confidences = []
-    centers = []
-    sizes = []
-    count = 0
+    def __init__(self):
+        self.labels = []
+        self.confidences = []
+        self.centers = []
+        self.sizes = []
+        self.count = 0
 
-    def add(label, confidence, center, size):
-        YoloResults.labels.append(label)
-        YoloResults.confidences.append(confidence)
-        YoloResults.centers.append(center)
-        YoloResults.sizes.append(size)
-        YoloResults.count = YoloResults.count + 1
+    def add(self, label, confidence, center, size):
+        self.labels.append(label)
+        self.confidences.append(confidence)
+        self.centers.append(center)
+        self.sizes.append(size)
+        self.count += 1
 
-    def clear():
-        YoloResults.labels.clear()
-        YoloResults.confidences.clear()
-        YoloResults.centers.clear()
-        YoloResults.sizes.clear()
-        YoloResults.count = 0
+    def clear(self):
+        self.labels.clear()
+        self.confidences.clear()
+        self.centers.clear()
+        self.sizes.clear()
+        self.count = 0
 
 class Drawmode(enum.Enum):
 
@@ -43,7 +44,6 @@ class Yolo:
         self.classes = open(names).read().strip().split('\n')
         np.random.seed(1)
         self.colors = np.random.randint(0, 255, size=(len(self.classes), 3), dtype='uint8')
-        YoloResults.clear()
 
     def run(self, frame):
         blob = cv2.dnn.blobFromImage(frame, 1.0 / 255, self.blobsize, 0, True, False)
@@ -74,13 +74,13 @@ class Yolo:
                     confidences.append(float(confidence))
                     classIDs.append(classID)
         
-        YoloResults.clear()
+        results = YoloResults()
         indices = cv2.dnn.NMSBoxes(boxes, confidences, self.conf_thresh, self.nms_thresh)
         if len(indices) > 0:
             for i in indices.flatten():
                 x, y = boxes[i][0], boxes[i][1]
                 w, h = boxes[i][2], boxes[i][3]
-                YoloResults.add(self.classes[classIDs[i]], confidences[i], centers[i], boxes[i])
+                results.add(self.classes[classIDs[i]], confidences[i], centers[i], boxes[i])
                 if self.drawmode == Drawmode.rectangle:
                     color = [int(c) for c in self.colors[classIDs[i]]]
                     cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
@@ -89,7 +89,7 @@ class Yolo:
                 elif self.drawmode == Drawmode.point:
                     color = [int(c) for c in self.colors[classIDs[i]]]
                     cv2.circle(frame, (int(x + w / 2), int(y + h / 2)), 3, color, 4)
-        return YoloResults
+        return results
 
 # if __name__ == '__main__':
 #     detector = Yolo("C:\\Users\\yamataku1998\\Desktop\\mulch\\mulch.cfg", "C:\\Users\\yamataku1998\\Desktop\\mulch\\mulch.names", "C:\\Users\\yamataku1998\\Desktop\\mulch\\mulch.weights", (640, 480), Drawmode.rectangle, 0.5, 0.3)
